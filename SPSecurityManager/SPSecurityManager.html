@@ -22,7 +22,7 @@ $(document).ready(function()
     var ul = $("<input id='filter' placeholder='Type in site name' /><ul id='root_tree'></ul>");
     ul.appendTo("#jqxMenu");
     buildUL(ul, jsondataSource);
-    $("#effect").hide();
+    //$("#effect").hide();
    
   });
 
@@ -80,7 +80,7 @@ var buildUL = function (parent, items) {
                   li.find('a').click(function()
                   {
                     var siteName = $(this).text();
-                    runEffect(siteName);
+                    //runEffect(siteName);
                     return false;
                   })
             }
@@ -226,7 +226,7 @@ var buildUL = function (parent, items) {
             }
 
         });
-        //$('#PersonTableContainer').jtable('load');
+        $('#PersonTableContainer').jtable('load');
     }
     function ShowSiteUsersAndGroups()
     {
@@ -247,6 +247,7 @@ var buildUL = function (parent, items) {
     #effect h3 { margin: 0; padding: 0.4em; text-align: center; }
     .ui-effects-transfer { border: 2px dotted gray; }
     #PersonTableContainer{width:800px;}
+    #accordion a { text-decoration: none; color: blue;}
   </style>
 </head>
 <body>
@@ -255,11 +256,33 @@ var buildUL = function (parent, items) {
         <div id="leftcolumn"><div id='jqxMenu'></div></div>
         <div id="content">
          <div id="effect" class="ui-widget-content ui-corner-all">
-          <h3 class="ui-widget-header ui-corner-all" ><span class="SiteHeader"></span></h3>
-           <div id="accordion">
+          <h3 class="ui-widget-header ui-corner-all" ><span class="SiteHeader">SP.SecurityManager Menu</span></h3>
+           <div id="accordion" >
+            
+            <ul>
+             <li>
+             <h4>Actions</h4>
+              <ul>
+              <li><a href='#'>Manage access on the current site.</a>
+                <ul><li>his action allows you to add or remove or grant permissions t user(s) and group(s) permissions on the current site.</li></ul>
+              </li>
+              <li><a href='#'>Manage access to a list or library within the current site.</a>
+                <ul><li>This action allows you to add or remove or grant permissions t user(s) and group(s) permissions on any list or library within the current site.</li></ul>
+              </li>
+              <li><a href='#'>Manage access on a selelcted site.</a>
+                   <ul><li>This action allows you to add or remove or grant permissions to user(s) and group(s) on a site you select from a list.</li></ul>
+              </li>
+              
+              <li><a href='#'>Manage access on a list\library from a selected site.</a>
+                <ul><li>This action allows you to add\remove\modify user(s) and group(s) or grant them to permssion to any list or library based on a selected site. </li></ul>
+              </li>
+            </ul>
+             </li>
+            </ul>
+            
             <fieldset>
              <LEGEND><span class="FieldSetTitle">Site Profile</span></LEGEND>
-             <div>
+             <div style="display:none">
               <div class="labels">Site Url:</div>
               <div id="SiteUrl" class="labels"> </div>
               <div class="labels">Site Creation Date:</div>
