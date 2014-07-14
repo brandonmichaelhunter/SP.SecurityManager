@@ -1,0 +1,297 @@
+<html ><head>
+
+<meta charset="utf-8">
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="Scripts/TreeListFilter.js"></script>
+<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+<script src="Scripts/DataLibrary.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="css/7858.css" />
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+<!-- Include one of jTable styles. -->
+<link href="Scripts/jtable/themes/metro/blue/jtable.min.css" rel="stylesheet" type="text/css" />
+ 
+<!-- Include jTable script file. -->
+<script src="Scripts/jtable/jquery.jtable.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+<!-- Menu Builder Example: http://www.jqwidgets.com/building-menu-from-json/ -->
+$(document).ready(function()
+  {
+    var source = LoadSiteHierarchy("");
+    var jsondataSource = builddata(source);
+    var ul = $("<input id='filter' placeholder='Type in site name' /><ul id='root_tree'></ul>");
+    ul.appendTo("#jqxMenu");
+    buildUL(ul, jsondataSource);
+    $("#effect").hide();
+   
+  });
+
+
+
+var builddata = function (DataSource) {
+    var source = [];
+    var items = [];
+    // build hierarchical source.
+      try 
+      {
+        for (i = 0; i < DataSource.length; i++) 
+        {
+            var item = DataSource[i];
+            var label = item.Name;
+            var parentid = item.ParentID;
+            var id = item.ID;
+            
+            if (items[parentid]) 
+            {
+                var item = { parentid: parentid, label: label, item: item };
+                if (!items[parentid].items) {
+                    items[parentid].items = [];
+                }
+                items[parentid].items[items[parentid].items.length] = item;
+                items[id] = item;
+            }
+            else 
+            {
+                items[id] = { parentid: parentid, label: label, item: item };
+                source[id] = items[id];
+            }
+        }
+     }
+    catch(err) {
+        var text = "There was an error on this page.\n\n";
+        text += "Error description: " + err.message + "\n\n";
+        text += "Click OK to continue.\n\n";
+        alert(text);
+    }
+    return source;
+}
+
+
+var buildUL = function (parent, items) {
+    //debugger;
+    $.each(items, function () {
+        if (this.label) {
+            // create LI element and append it to the parent element.
+            var li = "";
+            //debugger;
+            li = $("<li style='list-style-type:none;'><a href='#' title='"+this.item.ID+"'>"+ this.label+"</a></li>");
+            if(this.item.ObjectType == "Site")
+            {
+                  li.find('a').click(function()
+                  {
+                    var siteName = $(this).text();
+                    runEffect(siteName);
+                    return false;
+                  })
+            }
+            else if(this.item.ObjectType == "List")
+            {
+                  li.find('a').click(function()
+                  {
+                    var listID = $(this).attr('title');
+                    var listName = $(this).text();
+                    LoadListUsersAndGroupsProfile(listID,listName);
+                    return false;
+                  })
+            }
+
+            
+            li.appendTo(parent);
+            // if there are sub items, call the buildUL function.
+            if (this.items && this.items.length > 0) {
+                var ul = $("<ul></ul>");
+                ul.appendTo(li);
+                buildUL(ul, this.items);
+            }
+        }
+    });
+}
+
+// run the currently selected effect
+    function runEffect(SiteName) {
+      // get effect type from
+      var selectedEffect = "slide";//$( "#effectTypes" ).val();
+ 
+      // most effect types need no options passed by default
+      var options = {};
+
+      // some effects have required parameters
+      if ( selectedEffect === "scale" ) {
+        options = { percent: 0 };
+      } else if ( selectedEffect === "transfer" ) {
+        options = { to: "#button", className: "ui-effects-transfer" };
+      } else if ( selectedEffect === "size" ) {
+        options = { to: { width: 200, height: 60 } };
+      }
+      
+      // run the effect
+      $( "#effect" ).effect( selectedEffect, options, 500 );
+      $(".SiteHeader").text(SiteName);
+      var SiteData = GetSiteProfile();
+    };
+    
+    // callback function to bring a hidden box back
+    //function callback() {
+      //setTimeout(function() {
+       // $( "#effect" ).removeAttr( "style" ).hide().fadeIn();
+      //}, 1000 );
+    //};
+    function ShowSiteLists()
+    {
+        /* Remove SPListFilter and root_lists_tree controls from the page. */
+        var listTreeDiv = $("#ListsTree");
+        listTreeDiv.find("#SPListFilter").remove();
+        listTreeDiv.find("#root_lists_tree").remove(); 
+        $("#SiteDetails").show();
+        $("#SectionTitle").html("<b>All Lists and Libaries</b>");
+        $("#splists_tree").remove();
+        $("#SPListFilter").remove();
+        var SiteLists = GetListTree();
+      
+      var jsondataSource = builddata(SiteLists);
+      var listTreeDiv = $("#ListsTree");
+      var ul = $("<input id='SPListFilter' placeholder='Type in list name' /><ul id='splists_tree'></ul>");
+      ul.appendTo("#ListsTree");
+      
+      buildUL(ul, jsondataSource);
+      $('#SPListFilter').treeListFilter('#splists_tree', 200);
+
+      
+
+    }
+    /* TODO:
+       Implement a type ahead to elect the ObjectName, once the item is selected, then set the ObjectType value (User or Group)
+       Implement a drag and drop functionality for the Permissions column.
+       This is an error when you try to add a new record.
+       Figure out why when you select a different site, the list section does not reset. */
+    function LoadListUsersAndGroupsProfile(ListID, ListName)
+    {
+       var tableTitle = ListName+"'s list permissions";
+       $('#PersonTableContainer').jtable({
+            title: tableTitle,
+            actions: {
+                listAction: function (postData, jtParams) {
+                  return {
+                      "Result": "OK",
+                      "Records": [
+                          { "ObjectId": 1, "ObjectName": "IT Dept Owners", "ObjectType": "Group", "Permissions": "Full Control" },
+                          { "ObjectId": 2, "ObjectName": "Brandon M. Hunter", "ObjectType": "User", "Permissions": "Contribute" }
+                          ],
+                          "TotalRecordCount": 2
+                        };
+                },
+                createAction: '/GettingStarted/CreatePerson',
+                updateAction: '/GettingStarted/UpdatePerson',
+                deleteAction: '/GettingStarted/DeletePerson'
+            },
+            fields: {
+                ObjectId: {
+                    key: true,
+                    list: false
+                },
+                ObjectName: {
+                    title: 'Name',
+                    width: '50%',
+                    input: function (data) 
+                    {
+                           if(data.record)
+                           {
+                              return '<input style="width:400px" type="text" name="Name" disabled  value="' + data.record.ObjectName + '" />';
+                           }
+                           else
+                           {
+                            '<input style="width:400px" type="text" name="Name" disabled  value="Type in the User or Group name" />';
+                           }
+                    }
+                },
+                ObjectType: {
+                    title: 'Group or User',
+                    width: '20%',
+                    input: function (data) 
+                    {
+                           return '<input style="width:400px" type="text" name="Name" disabled  value="' + data.record.ObjectType + '" />';
+                    }
+                },
+                Permissions: {
+                    title: 'Permissions',
+                    width: '40%',
+                    input: function (data) 
+                    {
+                           if(data.record)
+                           {
+                              return '<input style="width:400px" type="text" name="Name"  value="' + data.record.ObjectType + '" />';
+                           }
+                    }
+                }
+            }
+
+        });
+        //$('#PersonTableContainer').jtable('load');
+    }
+    function ShowSiteUsersAndGroups()
+    {
+      $("#SiteDetails").show();
+      $("#SectionTitle").html("<b>All Groups and Users</b>");
+
+    }
+    function HideMe(ControlID)
+    {
+      $("#"+ControlID+"").hide();
+    }
+    
+</script>
+<style>
+    .toggler { width: 500px; height: 200px; position: relative; }
+    #button { padding: .5em 1em; text-decoration: none; }
+    #effect { width: 100%; height: 600px; padding: 0.4em; position: relative; }
+    #effect h3 { margin: 0; padding: 0.4em; text-align: center; }
+    .ui-effects-transfer { border: 2px dotted gray; }
+    #PersonTableContainer{width:800px;}
+  </style>
+</head>
+<body>
+  
+  <div id="wrapper">
+        <div id="leftcolumn"><div id='jqxMenu'></div></div>
+        <div id="content">
+         <div id="effect" class="ui-widget-content ui-corner-all">
+          <h3 class="ui-widget-header ui-corner-all" ><span class="SiteHeader"></span></h3>
+           <div id="accordion">
+            <fieldset>
+             <LEGEND><span class="FieldSetTitle">Site Profile</span></LEGEND>
+             <div>
+              <div class="labels">Site Url:</div>
+              <div id="SiteUrl" class="labels"> </div>
+              <div class="labels">Site Creation Date:</div>
+              <div id="SiteCreationDate"></div>
+              <div class="lables">Inherience Permissions from Parent site:</div>
+              <div id="InheritPermissions" class="labels links"></div>
+              <div><a href="#" onclick="ShowSiteLists();">Show All Lists</a>&nbsp;|&nbsp;<a href="#" onclick="ShowSiteUsersAndGroups()">Show All Site's Users and Groups</a></div>
+            </div>
+            </fieldset>
+            <fieldset id="SiteDetails" style="display:none;">
+              <LEGEND id="SectionTitle"></LEGEND>
+              <lable><a href="#" onclick="HideMe('SiteDetails');">Hide Me</a></label>
+                <div style='width: 100%'>
+                  <div style='float:left;width:30%;' id="ListsTree"></div>
+                  <div style='float:right; width:60%'>
+                    <div><h3>List Security Profile</h3>
+                        <!-- Use this linke http://www.jtable.org/ to show the security profile for a selected list. -->
+                        <div id="PersonTableContainer"></div>
+                    </div>
+                  </div>
+                  <div style='clear:both;'></div>
+                </div>
+            </fieldset>  
+          </div>
+        </div>
+    </div>
+  <script type="text/javascript">
+  $(function() {
+    $('#filter').treeListFilter('#root_tree', 200);
+    
+  });
+</script>
+
+</body>
+</html>
