@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>jQuery UI Sortable - Connect lists</title>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+  <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+  
+  <style>
+  .containers {
+    border: 1px solid #eee;
+    width: 300px;
+    min-height: 20px;
+    list-style-type: none;
+    margin: 0;
+    padding: 5px 0 0 0;
+    float: left;
+    margin-right: 10px;
+  }
+  .selected{color:red;}
+  .containers li {
+    margin: 0 5px 5px 5px;
+    padding: 5px;
+    font-size: 1.2em;
+    width: 300px;
+  }
+  </style>
+  <script>
+  function GetSecurityDetails()
+  {
+    var secObjs = [];
+    var secObj = new Object();
+    secObj.GroupName  = "Group1"
+    secObj.GroupID = 1;
+    secObj.UserName = "Brandon M. Hunter";
+    secObj.UserEmail = "bhunter@gmail.com";
+    secObj.UserID = 1;
+    secObjs.push(secObj);
+
+    var secObj = new Object();
+    secObj.GroupName  = "Group1"
+    secObj.GroupID = 1;
+    secObj.UserName = "Brandon I. Hunter";
+    secObj.UserEmail = "bhunterI@gmail.com";
+    secObj.UserID = 2;
+    secObjs.push(secObj);
+
+    var secObj = new Object();
+    secObj.GroupName  = "Group1"
+    secObj.GroupID = 1;
+    secObj.UserName = "Camerson M. Hunter";
+    secObj.UserEmail = "chunter@gmail.com";
+    secObj.UserID = 3;
+    secObjs.push(secObj);
+
+    var secObj = new Object();
+    secObj.GroupName  = "Group2"
+    secObj.GroupID = 2;
+    secObj.UserName = "Annie L. Hunter";
+    secObj.UserEmail = "ahunter@gmail.com";
+    secObj.UserID = 4;
+    secObjs.push(secObj);
+
+    var secObj = new Object();
+    secObj.GroupName  = "Group2"
+    secObj.GroupID = 2;
+    secObj.UserName = "Cora J. Hunter";
+    secObj.UserEmail = "cjhunter@gmail.com";
+    secObj.UserID = 5;
+    secObjs.push(secObj);
+
+    var secObj = new Object();
+    secObj.GroupName  = "UsersGroup"
+    secObj.GroupID = 3;
+    secObj.UserName = "Kym Hunter";
+    secObj.UserEmail = "Khunter@gmail.com";
+    secObj.UserID = 6;
+    secObjs.push(secObj);
+
+    var secObj = new Object();
+    secObj.GroupName  = "UsersGroup"
+    secObj.GroupID = 3;
+    secObj.UserName = "Andrea Hunter";
+    secObj.UserEmail = "ahunter@gmail.com";
+    secObj.UserID = 7;
+    secObjs.push(secObj);
+
+    var secObj = new Object();
+    secObj.GroupName  = "UsersGroup"
+    secObj.GroupID = 3;
+    secObj.UserName = "Kym Hunter Jr";
+    secObj.UserEmail = "KhunterII@gmail.com";
+    secObj.UserID = 8;
+    secObjs.push(secObj);
+
+    return secObjs;
+  }
+  function LoadUI()
+  {
+    var securityObjs = GetSecurityDetails();
+    var oldGroup = "";
+    var newGroup = "";
+    var htmlString = "";
+    var Groups = [];
+    htmlString += "<table><tr>";
+    for(var a = 0; a < securityObjs.length; a++)
+    {
+
+            newGroup = securityObjs[a].GroupName;
+            if(newGroup != oldGroup)
+            {
+               var group = new Object()
+               group.GroupName = securityObjs[a].GroupName;
+               group.GroupID = securityObjs[a].GroupID;
+               Groups.push(group)
+               oldGroup = newGroup;
+            }
+
+    }
+    for(var b = 0; b < Groups.length; b++)
+    {
+        htmlString += "<td valign='top'><div><div  groupid='"+Groups[b].GroupID+"'>"+Groups[b].GroupName+"</div><div>";
+        htmlString += "<ul id='"+Groups[b].GroupName+"' class='connectedSortable groups containers'>";
+        for(var c = 0; c < securityObjs.length; c++){
+            if(Groups[b].GroupID == securityObjs[c].GroupID){
+                var UserName = securityObjs[c].UserName;
+                var UserID = securityObjs[c].UserID;
+                var UserEmail = securityObjs[c].UserEmail;
+
+                htmlString += "<li userid='"+UserID+"' class='ui-state-default'>"+UserName+"&nbsp;("+UserEmail+")<a href='#' class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>"; 
+            }
+        }
+        htmlString += "</ul></div></div></td>";
+    }
+    htmlString += "</tr></table>";
+    $("body").append(htmlString);
+  }
+  /* Issue: I can drag two items to it's destination list, but the oriignal list on recieves the first last dragged item instead of the n of items I dragged when I started.*/
+  $(function() {
+    LoadUI();
+    var cloneItem = "";
+    var parentContainer = "";
+    var currentContainer = "";
+    var isFound = false;
+    $( ".groups" ).on('click', 'li', function (e) {
+    if (e.ctrlKey || e.metaKey) {
+        $(this).toggleClass("selected");
+    } else {
+        $(this).addClass("selected").siblings().removeClass('selected');
+    }
+}).sortable({
+      connectWith: ".connectedSortable",
+      delay: 150,
+      revert: 0,
+      //helper: 'clone',
+      helper: function (e, item) {
+        
+        var helper = $('<li/>');
+        /**/
+        if (!item.hasClass('selected')) {
+            item.addClass('selected').siblings().removeClass('selected');
+        }
+        var elements = item.parent().children('.selected').clone();
+        item.data('multidrag', elements).siblings('.selected').remove();
+        return helper.append(elements);
+      },
+      start: function (event, ui){
+        //alert("start")
+        parentContainer = "#"+ this.id;
+        //ui.item.siblings(".selected").appendTo(ui.item);
+      },
+      remove: function(event, ui){
+         
+         
+      },
+      receive: function (event, ui) {
+           
+            currentContainer = "#" + ui.item.context.parentElement.id;
+
+            var identicalItemCount  = $(currentContainer).children('li:contains(' + ui.item.text() + ')').length;
+           
+            if (identicalItemCount > 1) {    
+                $(currentContainer).children('li:contains(' + ui.item.text() + ')').first().remove();
+            }
+        },
+      stop: function(event,ui){
+        ui.item.after(ui.item.data('multidrag')).remove();
+        $(currentContainer).children('.selected').clone(true,true).appendTo(parentContainer);
+          
+        //ui.item.after(ui.item.find("li"));
+        //$(currentContainer).sortable( "refresh" )
+      } 
+    });
+
+    $(".DeleteMe").click(function(){
+          $(this).context.parentElement.remove();
+    });
+   //$("li").click(function() {
+    //  $(this).toggleClass("selected");
+   // });
+  });
+  
+  </script>
+</head>
+<body>
+  <!-- <table>
+    <tr>
+      <td valign="top">
+<div>
+  <div>Group 1</div>
+  <div>
+<ul id="sortable1" class="connectedSortable groups">
+  <li class="ui-state-default">Item 1<a href="#" class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>
+  <li class="ui-state-default">Item 2<a href="#" class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>
+  <li class="ui-state-default">Item 3<a href="#" class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>
+  <li class="ui-state-default">Item 4<a href="#" class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>
+  <li class="ui-state-default">Item 5<a href="#" class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>
+</ul>
+</div>
+</div>
+      </td>
+      <td valign="top">
+        <div>
+  <div>Group 2</div>
+  <div><ul id="sortable2" class="connectedSortable groups"></ul></div>
+</div>
+      </td>
+      <td valign="top">
+<div>
+  <div>Group 3</div>
+  <div><ul id="sortable3" class="connectedSortable groups"></ul></div>
+</div>
+      </td>-->
+    
+ 
+ 
+ 
+
+
+
+ 
+</body>
+</html>

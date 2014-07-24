@@ -17,11 +17,11 @@
 <!-- Menu Builder Example: http://www.jqwidgets.com/building-menu-from-json/ -->
 $(document).ready(function()
   {
-    var source = LoadSiteHierarchy("");
-    var jsondataSource = builddata(source);
-    var ul = $("<input id='filter' placeholder='Type in site name' /><ul id='root_tree'></ul>");
-    ul.appendTo("#jqxMenu");
-    buildUL(ul, jsondataSource);
+    //var source = LoadSiteHierarchy("");
+    //var jsondataSource = builddata(source);
+   // var ul = $("<input id='filter' placeholder='Type in site name' /><ul id='root_tree'></ul>");
+    //ul.appendTo("#jqxMenu");
+   // buildUL(ul, jsondataSource);
     //$("#effect").hide();
    
   });
@@ -238,7 +238,46 @@ var buildUL = function (parent, items) {
     {
       $("#"+ControlID+"").hide();
     }
-    
+    function ShowPanel(PanelId)
+    {
+      var siteUrl = "";
+
+      if(PanelId == 'CurrentSiteLevelAccess'){GetCurrentSiteLevelAccessDetails(siteUrl);}
+      else if (PanelId == 'CurrentSiteListLevelAccess'){GetCurrentSiteListLevelAccessDetails(siteUrl)}
+      else if (PanelId == 'SiteLevelAccess'){GetSiteLevelAccessDetails()}
+      else if (PanelId == 'ListLevelAccess'){GetListLEvelAccessDetails()}
+    }
+    function GetCurrentSiteLevelAccessDetails(SiteUrl)
+    {
+
+      $("#pnlCurrent_Site_List_LevelAccess").show();
+      $("#pnlSelectList").hide();
+      /* Load Data */
+      $("#pnlSecurityPanel")
+      var htmlContent = "";
+      htmlContent += "<table>";
+      htmlContent +="<thead>";
+      htmlContent +="</thead>";
+      htmlContent += "</table>";
+    }
+    function GetCurrentSiteListLevelAccessDetails(SiteUrl)
+    {
+      $("#pnlCurrent_Site_List_LevelAccess").show();
+      $("#pnlSelectList").show();
+    }
+    function GetSiteLevelAccessDetails(){}
+    function GetListLEvelAccessDetails(){}
+    function GetListDetails(ListName)
+    {
+      alert(ListName);
+    }
+    function CloseAllMenus()
+    {
+      $("#pnlCurrent_Site_List_LevelAccess").hide();
+      $("#pnlSelectList").hide();
+    }
+    //http://lightswitch05.github.io/table-to-json/
+    //http://blog.teamtreehouse.com/how-to-code-sortable-tabular-data-with-jquery
 </script>
 <style>
     .toggler { width: 500px; height: 200px; position: relative; }
@@ -248,6 +287,13 @@ var buildUL = function (parent, items) {
     .ui-effects-transfer { border: 2px dotted gray; }
     #PersonTableContainer{width:800px;}
     #accordion a { text-decoration: none; color: blue;}
+    .securitytable {width:100%; margin-bottom: 20px;display:table;}
+    .securitytable thead {display: table-header-group; vertical-align:middle;}
+    .securitytable thead tr {display:table-row; vertical-align:inherit;}
+    .securitytable thead th {vertical-align:bottom; font-weight:bold;text-align:left;}
+    .securitytable tbody{table-row-group;vertical-align:middle}
+    .securitytable tbody tr {display:table-row; vertical-align:inherit;}
+    .securitytable tbody td {padding:8px; line-height:20px;text-align:left;vertical-align:top;border-top:1px solid #dddddd;background-color:#f9f9f9;}
   </style>
 </head>
 <body>
@@ -261,52 +307,81 @@ var buildUL = function (parent, items) {
             
             <ul>
              <li>
-             <h4>Actions</h4>
+             <h4>Actions&nbsp;|&nbsp; <a href="#" onclick='CloseAllMenus()'>Close All Menus</a></h4>
               <ul>
-              <li><a href='#'>Manage access on the current site.</a>
-                <ul><li>his action allows you to add or remove or grant permissions t user(s) and group(s) permissions on the current site.</li></ul>
+              <li><a href='#' onclick="return ShowPanel('CurrentSiteLevelAccess');">Manage access on the current site.</a>
+                <ul><li>This action allows you to add or remove or grant permissions t user(s) and group(s) permissions on the current site.</li></ul>
               </li>
-              <li><a href='#'>Manage access to a list or library within the current site.</a>
+              <li><a href='#' onclick="return ShowPanel('CurrentSiteListLevelAccess');">Manage access to a list or library within the current site.</a>
                 <ul><li>This action allows you to add or remove or grant permissions t user(s) and group(s) permissions on any list or library within the current site.</li></ul>
               </li>
-              <li><a href='#'>Manage access on a selelcted site.</a>
+              <li><a href='#' onclick="return ShowPanel('SiteLevelAccess');">Manage access on a selelcted site.</a>
                    <ul><li>This action allows you to add or remove or grant permissions to user(s) and group(s) on a site you select from a list.</li></ul>
               </li>
               
-              <li><a href='#'>Manage access on a list\library from a selected site.</a>
+              <li><a href='#' onclick="return ShowPanel('ListLevelAccess');">Manage access on a list\library from a selected site.</a>
                 <ul><li>This action allows you to add\remove\modify user(s) and group(s) or grant them to permssion to any list or library based on a selected site. </li></ul>
               </li>
             </ul>
              </li>
             </ul>
-            
-            <fieldset>
-             <LEGEND><span class="FieldSetTitle">Site Profile</span></LEGEND>
-             <div style="display:none">
-              <div class="labels">Site Url:</div>
-              <div id="SiteUrl" class="labels"> </div>
-              <div class="labels">Site Creation Date:</div>
-              <div id="SiteCreationDate"></div>
-              <div class="lables">Inherience Permissions from Parent site:</div>
-              <div id="InheritPermissions" class="labels links"></div>
-              <div><a href="#" onclick="ShowSiteLists();">Show All Lists</a>&nbsp;|&nbsp;<a href="#" onclick="ShowSiteUsersAndGroups()">Show All Site's Users and Groups</a></div>
+            <hr />
+            <!-- Shows panel for current site and list level access. -->
+            <div id="pnlCurrent_Site_List_LevelAccess" style="width:100%; display:none;">
+              <div class="labels" style="padding-left:45%;"><span id="spSiteName">[SiteName]</span></div>
+              <div class="labels">Site Url: <span id="spSiteUrl"></span></div>
+              <div class="labels">Inherit Permissions from parent: <span id="spSiteUrl">[Yes\No]</span></div>
+              <div id="pnlSelectList" style="padding-top:5px;display:none">
+                <div><label>Search for list or library:</label></div>
+                <div><input type="text" style="width:400px" placeholder='Type in list name' id="txtListName" /> </div>
+                <div><input type="button" onclick="GetListDetails($('#txtListName').val());" value="Get list's security details" id="btnSearchListSecurity" /></div>
+                <div id="pnlListName" style="padding-left:45%">[List Name]</div>
+              </div>
+              <div id="pnlSecurityPanel" style="width:100%">
+                <table>
+                   <tr>
+                    <td><a href="#">Create or Remove a Group</a>&nbsp;|&nbsp;</td>
+                    <td><a href="#">Add or Remove a User</a>&nbsp;|&nbsp;</td>
+                    <td><a href="#">Save Changes</a></td></tr></table>
+                <table id="example-table" class="securitytable" style="">
+          <thead style="">
+            <tr style="">
+              <th>Name</th>
+              <th>User or Group</th>
+              <th>Permissions</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td >Jill</td>
+              <td>Smith</td>
+              <td>50</td>
+              <td><a href='#'>Edit</a>&nbsp;|&nbsp;<a href='#'>Delete</a></td>
+            </tr>
+            <tr>
+              <td>Eve</td>
+              <td/>Jackson</td>
+              <td>94</td>
+              <td><a href='#'>Edit</a>&nbsp;|&nbsp;<a href='#'>Delete</a></td>
+            </tr>
+            <tr>
+              <td>John</td>
+              <td>Doe</td>
+              <td>80</td>
+              <td><a href='#'>Edit</a>&nbsp;|&nbsp;<a href='#'>Delete</a></td></tr>
+            <tr>
+              <td>Adam</td>
+              <td>Johnson</td>
+              <td>67</td>
+              <td><a href='#'>Edit</a>&nbsp;|&nbsp;<a href='#'>Delete</a></td></tr>
+          </tbody>
+        </table>
+              </div>
             </div>
-            </fieldset>
-            <fieldset id="SiteDetails" style="display:none;">
-              <LEGEND id="SectionTitle"></LEGEND>
-              <lable><a href="#" onclick="HideMe('SiteDetails');">Hide Me</a></label>
-                <div style='width: 100%'>
-                  <div style='float:left;width:30%;' id="ListsTree"></div>
-                  <div style='float:right; width:60%'>
-                    <div><h3>List Security Profile</h3>
-                        <!-- Use this linke http://www.jtable.org/ to show the security profile for a selected list. -->
-                        <div id="PersonTableContainer"></div>
-                    </div>
-                  </div>
-                  <div style='clear:both;'></div>
-                </div>
-            </fieldset>  
-          </div>
+            
+
+            
         </div>
     </div>
   <script type="text/javascript">

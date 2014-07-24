@@ -198,3 +198,57 @@ function GetSiteProfile()
       Lists.push(List);
       return Lists;
     }
+    function GetSiteLevelSecurityProfile(SiteUrl)
+    {
+      var Items = [];
+      var Item;
+      
+      Item = new Object();
+      Item.Name = "Brandon M. Hunter";
+      Item.ID = 1;
+      Item.ObjectType = "User";
+      Item.Permissions = "Full Control, Contribute, Read";
+      Items.push(Item);
+
+      Item = new Object();
+      Item.Name = "IT Owner Members";
+      Item.ID = 2;
+      Item.ObjectType = "Group";
+      Item.Permissions = "Full Control";
+      Items.push(Item);
+
+      Item = new Object();
+      Item.Name = "IT Contribute Members";
+      Item.ID = 3;
+      Item.ObjectType = "Group";
+      Item.Permissions = "Contribute";
+      Items.push(Item);
+
+      Item = new Object();
+      Item.Name = "IT Visitors Members";
+      Item.ID = 4;
+      Item.ObjectType = "Group";
+      Item.Permissions = "Read";
+      Items.push(Item);
+
+      Item = new Object();
+      Item.Name = "Cora Jean Hunter";
+      Item.ID = 5;
+      Item.ObjectType = "User";
+      Item.Permissions = "Contribute";
+      Items.push(Item);
+
+      Item = new Object();
+      Item.Name = "Brandon Ian Hunter";
+      Item.ID = 6;
+      Item.ObjectType = "User";
+      Item.Permissions = "Contribute";
+      Items.push(Item);
+
+      Item = new Object();
+      Item.Name = "Cameron Michael Hunter";
+      Item.ID = 7;
+      Item.ObjectType = "User";
+      Item.Permissions = "Read";
+      Items.push(Item);
+    }
