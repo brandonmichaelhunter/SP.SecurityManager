@@ -175,21 +175,40 @@
          
       },
       receive: function (event, ui) {
-           
             currentContainer = "#" + ui.item.context.parentElement.id;
 
             var identicalItemCount  = $(currentContainer).children('li:contains(' + ui.item.text() + ')').length;
-           
+                 
             if (identicalItemCount > 1) {    
                 $(currentContainer).children('li:contains(' + ui.item.text() + ')').first().remove();
             }
         },
       stop: function(event,ui){
+        
         ui.item.after(ui.item.data('multidrag')).remove();
+        /* clone the dropped li elements back to it's original container. */
+        var destinationItems = $(currentContainer).find('.selected');
+        var sourceItems = $(parentContainer).find('.selected');
+        //alert(destinationItems.length);
+        //alert(sourceItems.length);
+        
+        
         $(currentContainer).children('.selected').clone(true,true).appendTo(parentContainer);
-          
-        //ui.item.after(ui.item.find("li"));
-        //$(currentContainer).sortable( "refresh" )
+        /*destinationItems.each(function(i)
+         {
+            var currentItem = $(this).text();
+            sourceItems.find('.selected').each(function(a)
+            {
+                if($(this).text() == currentItem)
+                {
+                  alert("Found");
+                }
+            }) 
+         });*/
+        /* Remove the '.selected' class from the li items after they were added.*/
+        $(parentContainer).find("li").removeClass("selected");
+        $(currentContainer).find("li").removeClass("selected");
+        
       } 
     });
 
