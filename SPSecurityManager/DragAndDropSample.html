@@ -49,7 +49,7 @@
     var secObj = new Object();
     secObj.GroupName  = "Group1"
     secObj.GroupID = 1;
-    secObj.UserName = "Camerson M. Hunter";
+    secObj.UserName = "Cameron M. Hunter";
     secObj.UserEmail = "chunter@gmail.com";
     secObj.UserID = 3;
     secObjs.push(secObj);
@@ -128,11 +128,13 @@
                 var UserID = securityObjs[c].UserID;
                 var UserEmail = securityObjs[c].UserEmail;
 
-                htmlString += "<li userid='"+UserID+"' class='ui-state-default'>"+UserName+"&nbsp;("+UserEmail+")<a href='#' class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>"; 
+                htmlString += "<li userid='"+UserID+"' username='"+UserName+"' class='ui-state-default'>"+UserName+"&nbsp;("+UserEmail+")<a href='#' class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>"; 
             }
         }
         htmlString += "</ul></div></div></td>";
     }
+    htmlString += "<td valign='top'><div><div  groupid='Events'>Events</div><div>";
+    htmlString += "<ul id='EventsList'></ul></div></div></td>";
     htmlString += "</tr></table>";
     $("body").append(htmlString);
   }
@@ -143,6 +145,7 @@
     var parentContainer = "";
     var currentContainer = "";
     var isFound = false;
+    var currentID= "";
     $( ".groups" ).on('click', 'li', function (e) {
     if (e.ctrlKey || e.metaKey) {
         $(this).toggleClass("selected");
@@ -153,65 +156,81 @@
       connectWith: ".connectedSortable",
       delay: 150,
       revert: 0,
+      revert: false,
       //helper: 'clone',
+      activate: function(event, ui){$("#EventsList").append("<li>activate</li>");},
+      beforeStop: function(event, ui){$("#EventsList").append("<li>beforeStop</li>");},
+      change: function(event,ui){$("#EventsList").append("<li>change</li>");},
+      create: function(event, ui){$("#EventsList").append("<li>create</li>");},
+      deactivate: function(event, ui){$("#EventsList").append("<li>deactivate</li>");},
+      out: function(event,ui){$("#EventsList").append("<li>out</li>");},
+      over: function(event,ui){$("#EventsList").append("<li>over</li>");},
+      sort: function(event, ui){$("#EventsList").append("<li>sort</li>");},
+      update: function(event,ui){$("#EventsList").append("<li>update</li>");},
       helper: function (e, item) {
-        
-        var helper = $('<li/>');
-        /**/
-        if (!item.hasClass('selected')) {
-            item.addClass('selected').siblings().removeClass('selected');
-        }
-        var elements = item.parent().children('.selected').clone();
-        item.data('multidrag', elements).siblings('.selected').remove();
-        return helper.append(elements);
-      },
-      start: function (event, ui){
-        //alert("start")
-        parentContainer = "#"+ this.id;
-        //ui.item.siblings(".selected").appendTo(ui.item);
-      },
-      remove: function(event, ui){
-         
-         
-      },
-      receive: function (event, ui) {
-            currentContainer = "#" + ui.item.context.parentElement.id;
-
-            var identicalItemCount  = $(currentContainer).children('li:contains(' + ui.item.text() + ')').length;
-                 
-            if (identicalItemCount > 1) {    
-                $(currentContainer).children('li:contains(' + ui.item.text() + ')').first().remove();
+         $("#EventsList").append("<li>helper</li>");
+         var helper = $('<li/>');
+            /**/
+            if (!item.hasClass('selected')) {
+                item.addClass('selected').siblings().removeClass('selected');
             }
-        },
-      stop: function(event,ui){
-        
-        ui.item.after(ui.item.data('multidrag')).remove();
-        /* clone the dropped li elements back to it's original container. */
-        var destinationItems = $(currentContainer).find('.selected');
-        var sourceItems = $(parentContainer).find('.selected');
-        //alert(destinationItems.length);
-        //alert(sourceItems.length);
-        
-        
-        $(currentContainer).children('.selected').clone(true,true).appendTo(parentContainer);
-        /*destinationItems.each(function(i)
-         {
-            var currentItem = $(this).text();
-            sourceItems.find('.selected').each(function(a)
-            {
-                if($(this).text() == currentItem)
-                {
-                  alert("Found");
+            /* Actions against the current parent. */
+            var elements = item.parent().children('.selected').clone();
+            item.data('multidrag', elements).siblings('.selected').remove();
+            item.parent().append(elements.clone().removeClass('selected'));
+            return helper.append(elements);
+      },
+      start: function (event, ui){$("#EventsList").append("<li>start</li>");},
+      remove: function(event, ui){$("#EventsList").append("<li>remove</li>");},
+      receive: function (event, ui) 
+      {
+         $("#EventsList").append("<li>receive</li>");
+         currentID = "#"+$(ui.item).parent().attr("id");
+         ui.item.data('multidrag').each(function () {
+                $(this).removeClass('selected');
+                var count = $(ui.item).parent().find('[userid="' + $(this).attr("userid") + '"]').length; 
+                if ($(ui.item).parent().find('[userid="' + $(this).attr("userid") + '"]').length > 1) {
+                    $(ui.item).remove();
                 }
-            }) 
-         });*/
-        /* Remove the '.selected' class from the li items after they were added.*/
-        $(parentContainer).find("li").removeClass("selected");
-        $(currentContainer).find("li").removeClass("selected");
-        
+            });
+            ui.item.after(ui.item.data('multidrag')).remove();
+      },
+      stop: function(event,ui){
+        $("#EventsList").append("<li>stop</li>");
+        /* Look in the original container and remove any duplicates */
+        var currentElements = $(currentID).children("li").clone();
+        currentElements.each(function()
+        {
+              var userid = $(this).attr("userid");
+              var NumOfItemsFound = $(currentID).find('[userid="' + userid + '"]').length;
+              if(NumOfItemsFound > 1)
+              {
+                 $(currentID).find('[userid="' + userid + '"]:first').remove();
+              } 
+        });
+
+        /* Sort the list. */
+        var Users = $(currentID);
+        var UsersLI = Users.children('li');
+        var listItems = UsersLI.sort(function(a,b){
+            var an = a.getAttribute('username');
+            var bn = b.getAttribute('username');
+
+            if(an > bn){
+               return 1;
+            }
+
+            if(an < bn){
+               return -1;
+            }
+        });
+
+        UsersLI.detach().appendTo(Users);
       } 
     });
-
+    function sort_li(a, b){
+    return ($(b).data('userid')) < ($(a).data('userid')) ? 1 : -1;    
+    }
     $(".DeleteMe").click(function(){
           $(this).context.parentElement.remove();
     });
@@ -223,6 +242,7 @@
   </script>
 </head>
 <body>
+
   <!-- <table>
     <tr>
       <td valign="top">
