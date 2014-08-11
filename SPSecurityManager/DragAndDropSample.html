@@ -18,6 +18,10 @@
     float: left;
     margin-right: 10px;
   }
+  .UserNameContainer{width:100%;}
+  .UserNameNamePanel{float:left;}
+  .UserNameIconPanel{float:right;}
+  .UserNameFooterPanel{clear:both;}
   .selected{color:red;}
   .containers li {
     margin: 0 5px 5px 5px;
@@ -128,7 +132,7 @@
                 var UserID = securityObjs[c].UserID;
                 var UserEmail = securityObjs[c].UserEmail;
 
-                htmlString += "<li userid='"+UserID+"' username='"+UserName+"' class='ui-state-default'>"+UserName+"&nbsp;("+UserEmail+")<a href='#' class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>"; 
+                htmlString += "<li userid='"+UserID+"' username='"+UserName+"' class='ui-state-default'><div class='UserNameContainer'><div class='UserNameNamePanel'>"+UserName+"</div><div class='UserNameIconPanel'><a href='#' Title='Delete User' userid='"+UserID+"' class='DeleteMe'>&nbsp;&nbsp;<img src='Images/Delete_Icon_15x15.png' alt='Delete User' /></a></div><div class='UserNameIconPanel'><a class='Info' userid='"+UserID+"' href='#' Title='User Info'>&nbsp;&nbsp;<img src='Images/Info_Icon_15x15.png' alt='User Info' /></a></div><div class='UserNameFooterPanel'></div></div></li>"; 
             }
         }
         htmlString += "</ul></div></div></td>";
@@ -243,41 +247,5 @@
 </head>
 <body>
 
-  <!-- <table>
-    <tr>
-      <td valign="top">
-<div>
-  <div>Group 1</div>
-  <div>
-<ul id="sortable1" class="connectedSortable groups">
-  <li class="ui-state-default">Item 1<a href="#" class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>
-  <li class="ui-state-default">Item 2<a href="#" class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>
-  <li class="ui-state-default">Item 3<a href="#" class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>
-  <li class="ui-state-default">Item 4<a href="#" class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>
-  <li class="ui-state-default">Item 5<a href="#" class='DeleteMe'>&nbsp;&nbsp;X&nbsp;&nbsp;</a></li>
-</ul>
-</div>
-</div>
-      </td>
-      <td valign="top">
-        <div>
-  <div>Group 2</div>
-  <div><ul id="sortable2" class="connectedSortable groups"></ul></div>
-</div>
-      </td>
-      <td valign="top">
-<div>
-  <div>Group 3</div>
-  <div><ul id="sortable3" class="connectedSortable groups"></ul></div>
-</div>
-      </td>-->
-    
- 
- 
- 
-
-
-
- 
 </body>
 </html>
