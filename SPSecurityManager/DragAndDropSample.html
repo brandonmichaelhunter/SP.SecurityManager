@@ -192,14 +192,15 @@
       stop: function(event,ui){
         $("#EventsList").append("<li>stop</li>");
         /* Look in the original container and remove any duplicates */
-        
+        currentID = "#"+$(ui.item).parent().attr("id");
+        $(currentID).find("li").removeClass('selected');
         var currentElements = $(currentID).children("li").clone();
         currentElements.each(function()
         {
               var userid = $(this).attr("userid");
               var NumOfItemsFound = $(currentID).find('[userid="' + userid + '"]').length;
-              if(NumOfItemsFound > 1)
-              {
+              
+              if(NumOfItemsFound > 1){
                 $(currentID).find('[userid="' + userid + '"]:first').remove();
               } 
         });
@@ -220,12 +221,10 @@
             }
         });*/
 
-        UsersLI.detach().appendTo(Users);
+        //UsersLI.detach().appendTo(Users);
       } 
     });
-    function sort_li(a, b){
-    return ($(b).data('userid')) < ($(a).data('userid')) ? 1 : -1;    
-    }
+    
     $(".DeleteMe").click(function(){
           $(this).context.parentElement.remove();
     });
