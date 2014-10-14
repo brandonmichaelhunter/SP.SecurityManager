@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>jQuery UI Sortable - Connect lists</title>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+  <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+  
+  <style>
+.term-list{ margin-bottom: 20px;}
+  </style>
+  <script>
+  var showMoreItemsCount = 4;
+  $(document).ready(function(){
+    $(".child").each(function(){
+       $(this).find("li:lt(5)").show();   
+       alert($(this).find("li").length) 
+       if($(this).find("li").length>3)
+              $(this).append("<li class='moreless more'>more</li>") ;          
+    });
+    
+    $("moreless").on("click", function(){
+        alert('here')
+       if($(this).hasClass("more"))
+       {
+           $(this).prevAll("li").show();
+           $(this).text("less").addClass("less").removeClass("more");
+       }
+       else if($(this).hasClass("less"))
+       {
+           $(this).prevAll("li").hide();
+           $(this).parent().find("li:lt(3)").show();
+           $(this).text("more").addClass("more").removeClass("less");
+       }
+    });
+
+        
+});
+  </script>
+</head>
+<body>
+
+  
+<ul class="child">
+<li class="hide">Item 1</li>
+<li class="hide">Item 2</li>
+<li class="hide">Item 3</li>
+<li class="hide">Item 4</li>
+<li class="hide">Item 5</li>
+<li class="hide">Item 6</li>
+<li class="hide">Item 7</li>
+<li class="hide">Item 8</li>
+<li class="hide">Item 9</li>
+<li class="hide">Item 10</li>
+<li class="hide">Item 11</li>
+<li class="hide">Item 12</li>
+<li class="hide">Item 13</li>
+<li class="hide">Item 14</li>
+<li class="hide">Item 15</li>
+<li class="hide">Item 16</li>
+<li class="hide">Item 17</li>
+<li class="hide">Item 18</li>
+<li class="hide">Item 19</li>
+<li class="hide">Item 20</li>    
+</ul>
+
+
+
+</body>
+</html>

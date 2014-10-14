@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>jQuery UI Sortable - Connect lists</title>
+ 
+  <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+</script>
+  <style>
+  .containers {
+    border: 1px solid #eee;
+    width: 335px;
+    min-height:250px;
+    max-height: 350px;
+    list-style-type: none;
+    margin: 0;
+    padding: 5px 0 0 0;
+    float: left;
+    margin-right: 10px;
+    overflow-y:auto;
+
+  }
+  .SelectedUser{color:red;font-weight: bold}
+  .UserNameContainer{width:100%;}
+  .UserNameNamePanel{float:left;}
+  .UserNameIconPanel{float:right;}
+  .UserNameFooterPanel{clear:both;}
+  .selected{color:red;}
+  .containers li {
+    margin: 0 5px 5px 5px;
+    padding: 5px;
+    font-size: 1.2em;
+    width: 300px;
+  }
+  </style>
+  <script>
+ $(document).ready(function()
+ {
+    var selectedUserID = 6
+    var SearchedElement = $("li[userid= " + selectedUserID + " ]");
+    SearchedElement.addClass('SelectedUser');
+    alert(SearchedElement.parent().parent().parent().find("div").attr("groupid"));
+ });
+  </script>
+</head>
+<body>
+<div>
+   <div groupid="21" class="">UsersGroup-2</div>
+   <div groupid="2">
+    <ul id="UsersGroup-21" class="connectedSortable groups containers ui-sortable">
+      <li userid="6" username="User - 6" groupid="2" class="ui-state-default ui-sortable-handle"><div class="UserNameContainer"><div class="UserNameNamePanel">User - 6</div><div class="UserNameIconPanel"><a href="#" title="Delete User" securityobjectid="6" class="DeleteMe">&nbsp;&nbsp;<img src="Images/Delete_Icon_15x15.png" alt="Delete User"></a></div><div class="UserNameIconPanel"><a class="Info" securityobjectid="6" href="#" title="User Info">&nbsp;&nbsp;<img src="Images/Info_Icon_15x15.png" alt="User Info"></a></div><div class="UserNameFooterPanel"></div></div></li><li userid="7" username="User - 7" groupid="2" class="ui-state-default ui-sortable-handle"><div class="UserNameContainer"><div class="UserNameNamePanel">User - 7</div><div class="UserNameIconPanel"><a href="#" title="Delete User" securityobjectid="7" class="DeleteMe">&nbsp;&nbsp;<img src="Images/Delete_Icon_15x15.png" alt="Delete User"></a></div><div class="UserNameIconPanel"><a class="Info" securityobjectid="7" href="#" title="User Info">&nbsp;&nbsp;<img src="Images/Info_Icon_15x15.png" alt="User Info"></a></div><div class="UserNameFooterPanel"></div></div></li><li userid="8" username="User - 8" groupid="2" class="ui-state-default ui-sortable-handle"><div class="UserNameContainer"><div class="UserNameNamePanel">User - 8</div><div class="UserNameIconPanel"><a href="#" title="Delete User" securityobjectid="8" class="DeleteMe">&nbsp;&nbsp;<img src="Images/Delete_Icon_15x15.png" alt="Delete User"></a></div><div class="UserNameIconPanel"><a class="Info" securityobjectid="8" href="#" title="User Info">&nbsp;&nbsp;<img src="Images/Info_Icon_15x15.png" alt="User Info"></a></div><div class="UserNameFooterPanel"></div></div></li><li userid="9" username="User - 9" groupid="2" class="ui-state-default ui-sortable-handle"><div class="UserNameContainer"><div class="UserNameNamePanel">User - 9</div><div class="UserNameIconPanel"><a href="#" title="Delete User" securityobjectid="9" class="DeleteMe">&nbsp;&nbsp;<img src="Images/Delete_Icon_15x15.png" alt="Delete User"></a></div><div class="UserNameIconPanel"><a class="Info" securityobjectid="9" href="#" title="User Info">&nbsp;&nbsp;<img src="Images/Info_Icon_15x15.png" alt="User Info"></a></div><div class="UserNameFooterPanel"></div></div></li><li userid="10" username="User - 10" groupid="2" class="ui-state-default ui-sortable-handle"><div class="UserNameContainer"><div class="UserNameNamePanel">User - 10</div><div class="UserNameIconPanel"><a href="#" title="Delete User" securityobjectid="10" class="DeleteMe">&nbsp;&nbsp;<img src="Images/Delete_Icon_15x15.png" alt="Delete User"></a></div><div class="UserNameIconPanel"><a class="Info" securityobjectid="10" href="#" title="User Info">&nbsp;&nbsp;<img src="Images/Info_Icon_15x15.png" alt="User Info"></a></div><div class="UserNameFooterPanel"></div></div></li></ul></div></div>
+</body>
+</html>
