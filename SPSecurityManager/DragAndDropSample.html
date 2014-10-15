@@ -14,47 +14,70 @@
 
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.0/jquery.validate.min.js"></script>
   <style>
   .containers {
-    border: 1px solid #eee;
-    width: 335px;
-    min-height:250px;
-    max-height: 350px;
-    list-style-type: none;
-    margin: 0;
-    padding: 5px 0 0 0;
-    float: left;
-    margin-right: 10px;
-    overflow-y:auto;
-
+    border: 1px solid #eee;width: 335px;
+    min-height:250px;max-height: 350px;list-style-type: none;margin: 0;
+    padding: 5px 0 0 0;float: left;margin-right: 10px;overflow-y:auto;
   }
-  .FindUser{color:red;font-weight: bold}
+  .SelectedUser{color:red;font-weight: bold}
   .UserNameContainer{width:100%;}
   .UserNameNamePanel{float:left;}
   .UserNameIconPanel{float:right;}
   .UserNameFooterPanel{clear:both;}
   .selected{color:red;}
-  .containers li {
-    margin: 0 5px 5px 5px;
-    padding: 5px;
-    font-size: 1.2em;
-    width: 300px;
-  }
+  .containers li {margin: 0 5px 5px 5px;padding: 5px;font-size: 1.2em;width: 300px;}
+  .SearchResultMessage{padding-top: 10px;
+padding-bottom: 10px;
+padding-left: 20%;
+padding-right: 20%;
+font-size: 18px;}
+.MessageNames{font-weight: bold;color:red;}
   </style>
   <script>
   function SearchUsers()
   {
-      $("div").removeClass('FindUser');
-      $("li").removeClass('FindUser');
-      var selectedUserID = $("input:hidden[id='SearchUsersSelectedID']").val();
+      var Count = 0;
+      var GroupNames = [];
+      var UserName = "";
+      var SearchResultMessage = "";
+      var GroupID = "";
+      var GroupText = "";
+      var SearchResultMessage = "";
+      /* Remove the class once a new search begins. */
       
-      var SelectedUsers = $("li[userid= " + selectedUserID + " ]");//.addClass('FindUser');//('color','red').css('font-weight','bold');
-      SelectedUsers.each(function()
+
+      /* Retrieve user id selected stored in a hidden control */
+      var selectedUserID = $("input:hidden[id='SearchUsersSelectedID']").val();
+      var SelectedUsers = $("li[userid= " + selectedUserID + " ]");
+      
+      UserName = $("input[id='SearchUsersTextbox']").val();
+      
+      Count = SelectedUsers.length;
+      if(Count > 0 )
       {
-          var GroupID = $(this).parent().parent().parent().find("div").attr('groupid');
-          $("div[groupid="+GroupID+"]").addClass('FindUser');
-      });
-      $("li[userid= " + selectedUserID + " ]").addClass('FindUser');
+        SelectedUsers.each(function()
+        {
+          GroupID = $(this).parent().parent().parent().find("div").attr('groupid');
+          GroupText = $(this).parent().parent().parent().find("div").html();
+          
+          $("div[groupid="+GroupID+"]").addClass('SelectedUser');
+          GroupNames.push(GroupText);
+        });
+      
+        $("li[userid= " + selectedUserID + " ]").addClass('SelectedUser');
+      
+        SearchResultMessage = jQuery.validator.format("<span class='MessageNames'>{0} </span>is found in the following groups: <span class='MessageNames'>{1}</span>",UserName, GroupNames);
+        $("#SearchResultMessage").html(SearchResultMessage);
+        $("input:hidden[id='SearchUsersSelectedID']").val("")
+      }
+      else
+      {
+          SearchResultMessage = jQuery.validator.format("<span class='MessageNames'>{0}</span> was not found.",UserName);
+          $("#SearchResultMessage").html(SearchResultMessage);
+      }
+      
   }
   var SelectedUsers = []
   function ConfigureSearchUsersCtrl()
@@ -63,6 +86,7 @@
       {
         SearchUsers();
       });
+
     var SiteUsers = LoadUsers();
     
     
@@ -74,6 +98,7 @@
           source: SiteUsers,
           select: function(event, ui)
           {
+                  
             $("#SearchUsersTextbox").val(ui.item.label);
             $("#SearchUsersSelectedID").val(ui.item.value);
             return false;
@@ -324,6 +349,7 @@
    <button type="button" id="SearchUsers" class="btn btn-primary btn-sm">Search Users</button>
   </form>
 </div>
+<div id="SearchResultMessage" class="SearchResultMessage"></div>
 <div id="SiteGroupsUsersContainer">
 </div>
 </body>
