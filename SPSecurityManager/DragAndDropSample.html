@@ -46,7 +46,8 @@ font-size: 18px;}
       var GroupText = "";
       var SearchResultMessage = "";
       /* Remove the class once a new search begins. */
-      
+      $("div").removeClass('SelectedUsers')
+      $("li").removeClass('SelectedUsers')
 
       /* Retrieve user id selected stored in a hidden control */
       var selectedUserID = $("input:hidden[id='SearchUsersSelectedID']").val();
@@ -61,8 +62,8 @@ font-size: 18px;}
         {
           GroupID = $(this).parent().parent().parent().find("div").attr('groupid');
           GroupText = $(this).parent().parent().parent().find("div").html();
-          
           $("div[groupid="+GroupID+"]").addClass('SelectedUser');
+          $(this).parent().scrollTop($(this).offset().top);
           GroupNames.push(GroupText);
         });
       
@@ -166,7 +167,7 @@ font-size: 18px;}
         secObj.UserID = a;
         secObjs.push(secObj);
 
-        if(a == 41 || a == 13 || a == 27)
+        if(a == 25 || a == 40 || a == 50)
         {
           secObj = new Object();
           secObj.GroupName  = "UsersGroup-" + GroupID
