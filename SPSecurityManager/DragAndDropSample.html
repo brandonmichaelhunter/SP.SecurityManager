@@ -36,6 +36,7 @@ font-size: 18px;}
 .MessageNames{font-weight: bold;color:red;}
   </style>
   <script>
+  var CopyModeEnabled = 0;
   function SearchUsers()
   {
       var Count = 0;
@@ -216,7 +217,7 @@ font-size: 18px;}
                  var UserName = securityObjs[c].UserName;
                  var UserID = securityObjs[c].UserID;
                  var UserEmail = securityObjs[c].UserEmail;
-                 htmlString += "<li userid='"+UserID+"' username='"+UserName+"' class='ui-state-default'><div class='UserNameContainer'><div class='UserNameNamePanel'>"+UserName+"</div><div class='UserNameIconPanel'><a href='#' Title='Delete User' securityobjectid='"+UserID+"' class='DeleteMe'>&nbsp;&nbsp;<img src='Images/Delete_Icon_15x15.png' alt='Delete User' /></a></div><div class='UserNameIconPanel'><a class='Info' securityobjectid='"+UserID+"' href='#' Title='User Info'>&nbsp;&nbsp;<img src='Images/Info_Icon_15x15.png' alt='User Info' /></a></div><div class='UserNameFooterPanel'></div></div></li>"; /**/
+                 htmlString += "<li userid='"+UserID+"' username='"+UserName+"' class='ui-state-default'><div class='UserNameContainer'><div class='UserNameNamePanel'>"+UserName+"</div><div class='UserNameIconPanel'><a id='lnkCopyUser' href='#' Title='Copy User' securityobjectid='"+UserID+"'>C</a></div><div class='UserNameIconPanel'><a href='#' Title='Delete User' securityobjectid='"+UserID+"' class='DeleteMe'>&nbsp;&nbsp;<img src='Images/Delete_Icon_15x15.png' alt='Delete User' /></a></div><div class='UserNameIconPanel'><a class='Info' securityobjectid='"+UserID+"' href='#' Title='User Info'>&nbsp;&nbsp;<img src='Images/Info_Icon_15x15.png' alt='User Info' /></a></div><div class='UserNameFooterPanel'></div></div></li>"; /**/
             }
          }
        }
@@ -310,16 +311,23 @@ font-size: 18px;}
       } 
     });
     
-    $(".DeleteMe").click(function(){
-          $(this).context.parentElement.remove();
-    });
+    $(".DeleteMe").click(function(){$(this).context.parentElement.remove();});
     
     $("#SearchForUserGrid").click(function()
     {
         var options = {};
         $("#SearchGrid").toggle("blind",options, 500);
     })
+
+    $("lnkCopyUser").click(function()
+    {
+       EnableCopyMode()
+    })
   });
+  function EnableCopyMode()
+  {
+    CopyModeEnabled +=
+  }
   function sortUnorderedList(ul, sortDescending) {
           if(typeof ul == "string")
             ul = document.getElementById(ul);
