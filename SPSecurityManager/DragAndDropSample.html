@@ -277,14 +277,15 @@ font-size: 18px;}
             /* Actions against the current parent. */
             var elements = item.parent().children('.selected').clone();
             item.data('multidrag', elements).siblings('.selected').remove();
-            item.parent().append(elements.clone().removeClass('selected'));
+            //item.parent().append(elements.clone().removeClass('selected'));
             return helper.append(elements);
       },
 
       receive: function (event, ui) 
       {
-         $("#EventsList").append("<li>receive</li>");
+         
          currentID = "#"+$(ui.item).parent().attr("id");
+
          ui.item.data('multidrag').each(function () {
                 $(this).removeClass('selected');
                 var count = $(ui.item).parent().find('[userid="' + $(this).attr("userid") + '"]').length; 
@@ -295,59 +296,62 @@ font-size: 18px;}
             ui.item.after(ui.item.data('multidrag')).remove();
       },
       stop: function(event,ui){
-        $("#EventsList").append("<li>stop</li>");
+        //$("#EventsList").append("<li>stop</li>");
         /* Look in the original container and remove any duplicates */
-        currentID = "#"+$(ui.item).parent().attr("id");
+        //currentID = "#"+$(ui.item).parent().attr("id");
+        
         $(currentID).find("li").removeClass('selected');
-        var currentElements = $(currentID).children("li").clone();
-        currentElements.each(function()
-        {
-              var userid = $(this).attr("userid");
-              var NumOfItemsFound = $(currentID).find('[userid="' + userid + '"]').length;
-              
-              if(NumOfItemsFound > 1){
-                $(currentID).find('[userid="' + userid + '"]:first').remove();
-              } 
-        });
-
-        /* Sort the list. 
-        var Users = $(currentID);
-        var UsersLI = Users.children('li');
-        var listItems = UsersLI.sort(function(a,b){
-            var an = a.getAttribute('username');
-            var bn = b.getAttribute('username');
-
-            if(an > bn){
-               return 1;
-            }
-
-            if(an < bn){
-               return -1;
-            }
-        });*/
+        
 
         //UsersLI.detach().appendTo(Users);
+        ulID = currentID.substring(1, currentID.length);
+        var desc = false;
+        sortUnorderedList(ulID,desc)
       } 
     });
     
     $(".DeleteMe").click(function(){
           $(this).context.parentElement.remove();
     });
-   //$("li").click(function() {
-    //  $(this).toggleClass("selected");
-   // });
+    
+    $("#SearchForUserGrid").click(function()
+    {
+        var options = {};
+        $("#SearchGrid").toggle("blind",options, 500);
+    })
   });
-  
+  function sortUnorderedList(ul, sortDescending) {
+          if(typeof ul == "string")
+            ul = document.getElementById(ul);
+
+          var lis = ul.getElementsByTagName("LI");
+          var vals = [];
+
+          for(var i = 0, l = lis.length; i < l; i++)
+            vals.push(lis[i].innerHTML);
+
+          vals.sort();
+
+          if(sortDescending)
+            vals.reverse();
+
+          for(var i = 0, l = lis.length; i < l; i++)
+            lis[i].innerHTML = vals[i];
+        }
   </script>
 </head>
 <body>
 <div id="SearchContainer">
   <form role="form">
-    <label for="SearchUsersTextbox">Search for users</label>
-   <input type="text" id="SearchUsersTextbox" class="form-control ui-state-highlight" />
-   <input type='hidden' id="SearchUsersSelectedID" value='' />
-   <span class="help-block">Type in the name of the user(s) you want to find. </span>
-   <button type="button" id="SearchUsers" class="btn btn-primary btn-sm">Search Users</button>
+    <a id="SearchForUserGrid" href="#"><label id="SearchUserLabel" for="SearchUsersTextbox">Search for users</label></a>
+    
+    <div id="SearchGrid" style="display:none">
+    
+    <input type="text" id="SearchUsersTextbox" class="form-control ui-state-highlight" />
+    <input type='hidden' id="SearchUsersSelectedID" value='' />
+    <span class="help-block">Type in and select the user's name and click the Search Users button to start your search. </span>
+    <button type="button" id="SearchUsers" class="btn btn-primary btn-sm">Search Users</button>
+    </div>
   </form>
 </div>
 <div id="SearchResultMessage" class="SearchResultMessage"></div>
