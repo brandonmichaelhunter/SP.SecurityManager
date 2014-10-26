@@ -36,7 +36,12 @@ font-size: 18px;}
 .MessageNames{font-weight: bold;color:red;}
   </style>
   <script>
+  /*
+    TODO: For copy users and groups selected, hook up the Copy Users button to move the users to their new group. After they have been copy removed the SelelctedUsers class from the source items.
+  */
   var CopyModeEnabled = 0;
+  var CopyItems = [];
+  var Groups = [];
   function SearchUsers()
   {
       var Count = 0;
@@ -187,11 +192,10 @@ font-size: 18px;}
     var oldGroup = "";
     var newGroup = "";
     var htmlString = "";
-    var Groups = [];
+    
     htmlString += "<table>";
     for(var a = 0; a < securityObjs.length; a++)
     {
-
             newGroup = securityObjs[a].GroupName;
             if(newGroup != oldGroup)
             {
@@ -217,7 +221,8 @@ font-size: 18px;}
                  var UserName = securityObjs[c].UserName;
                  var UserID = securityObjs[c].UserID;
                  var UserEmail = securityObjs[c].UserEmail;
-                 htmlString += "<li userid='"+UserID+"' username='"+UserName+"' class='ui-state-default'><div class='UserNameContainer'><div class='UserNameNamePanel'>"+UserName+"</div><div class='UserNameIconPanel'><a id='lnkCopyUser' href='#' Title='Copy User' securityobjectid='"+UserID+"'>C</a></div><div class='UserNameIconPanel'><a href='#' Title='Delete User' securityobjectid='"+UserID+"' class='DeleteMe'>&nbsp;&nbsp;<img src='Images/Delete_Icon_15x15.png' alt='Delete User' /></a></div><div class='UserNameIconPanel'><a class='Info' securityobjectid='"+UserID+"' href='#' Title='User Info'>&nbsp;&nbsp;<img src='Images/Info_Icon_15x15.png' alt='User Info' /></a></div><div class='UserNameFooterPanel'></div></div></li>"; /**/
+                 var GroupID = securityObjs[c].GroupID;
+                 htmlString += "<li userid='"+UserID+"' groupid='"+GroupID+"' username='"+UserName+"' class='ui-state-default'><div class='UserNameContainer'><div class='UserNameNamePanel'>"+UserName+"</div><div class='UserNameIconPanel'><a class='CopyMe' id='lnkCopyUser' groupid='"+GroupID+"' href='#' Title='Copy User' securityobjectid='"+UserID+"'>C</a></div><div class='UserNameIconPanel'><a href='#' Title='Delete User' securityobjectid='"+UserID+"' class='DeleteMe'>&nbsp;&nbsp;<img src='Images/Delete_Icon_15x15.png' alt='Delete User' /></a></div><div class='UserNameIconPanel'><a class='Info' securityobjectid='"+UserID+"' href='#' Title='User Info'>&nbsp;&nbsp;<img src='Images/Info_Icon_15x15.png' alt='User Info' /></a></div><div class='UserNameFooterPanel'></div></div></li>"; /**/
             }
          }
        }
@@ -234,7 +239,7 @@ font-size: 18px;}
                  var UserName = securityObjs[c].UserName;
                  var UserID = securityObjs[c].UserID;
                  var UserEmail = securityObjs[c].UserEmail;
-                 htmlString += "<li userid='"+UserID+"' username='"+UserName+"' class='ui-state-default'><div class='UserNameContainer'><div class='UserNameNamePanel'>"+UserName+"</div><div class='UserNameIconPanel'><a href='#' Title='Delete User' securityobjectid='"+UserID+"' class='DeleteMe'>&nbsp;&nbsp;<img src='Images/Delete_Icon_15x15.png' alt='Delete User' /></a></div><div class='UserNameIconPanel'><a class='Info' securityobjectid='"+UserID+"' href='#' Title='User Info'>&nbsp;&nbsp;<img src='Images/Info_Icon_15x15.png' alt='User Info' /></a></div><div class='UserNameFooterPanel'></div></div></li>"; /**/
+                 htmlString += "<li userid='"+UserID+"' groupid='"+GroupID+"'  username='"+UserName+"' class='ui-state-default'><div class='UserNameContainer'><div class='UserNameNamePanel'>"+UserName+"</div><div class='UserNameIconPanel'><a class='CopyMe' id='lnkCopyUser' groupid='"+GroupID+"' href='#' Title='Copy User' securityobjectid='"+UserID+"'>C</a></div><div class='UserNameIconPanel'><a href='#' Title='Delete User' securityobjectid='"+UserID+"' class='DeleteMe'>&nbsp;&nbsp;<img src='Images/Delete_Icon_15x15.png' alt='Delete User' /></a></div><div class='UserNameIconPanel'><a class='Info' securityobjectid='"+UserID+"' href='#' Title='User Info'>&nbsp;&nbsp;<img src='Images/Info_Icon_15x15.png' alt='User Info' /></a></div><div class='UserNameFooterPanel'></div></div></li>"; /**/
             }
          }
        }
@@ -248,9 +253,8 @@ font-size: 18px;}
   }
   /* Issue: I can drag two items to it's destination list, but the oriignal list on recieves the first last dragged item instead of the n of items I dragged when I started.*/
   $(function() {
-    ConfigureSearchUsersCtrl();
+    init();
     
-    LoadUI();
     var cloneItem = "";
     var parentContainer = "";
     var currentContainer = "";
@@ -260,7 +264,7 @@ font-size: 18px;}
     if (e.ctrlKey || e.metaKey) {
         $(this).toggleClass("selected");
     } else {
-        $(this).addClass("selected").siblings().removeClass('selected');
+        $(this).toggleClass("selected");//.siblings().removeClass('selected');
     }
 }).sortable({
       connectWith: ".connectedSortable",
@@ -269,24 +273,42 @@ font-size: 18px;}
       revert: false,
  
       helper: function (e, item) {
-         $("#EventsList").append("<li>helper</li>");
          var helper = $('<li/>');
             /**/
-            if (!item.hasClass('selected')) {
-                item.addClass('selected').siblings().removeClass('selected');
+            
+            /* START - OLD CODE */
+            if(CopyItems.length > 0)
+            {
+                
+                if (!item.hasClass('selected')) {
+                    item.addClass('selected').siblings().removeClass('selected');
+                }
+                /* Actions against the current parent. */
+                var elements = item.parent().children('.selected').clone();
+                item.data('multidrag', elements).siblings('.selected').remove();
+                item.parent().append(elements.clone().removeClass('selected'));
+                debugger;
+                return helper.append(elements);
             }
-            /* Actions against the current parent. */
-            var elements = item.parent().children('.selected').clone();
-            item.data('multidrag', elements).siblings('.selected').remove();
-            //item.parent().append(elements.clone().removeClass('selected'));
-            return helper.append(elements);
+            else
+            {
+                //alert("We do not have copy items")
+                if (!item.hasClass('selected')) {
+                    item.addClass('selected').siblings().removeClass('selected');
+                }
+                /* Actions against the current parent. */
+                var elements = item.parent().children('.selected').clone();
+                item.data('multidrag', elements).siblings('.selected').remove();
+                //item.parent().append(elements.clone().removeClass('selected'));
+                return helper.append(elements);
+            }
+            
+            /* END - OLD CODE */
       },
 
       receive: function (event, ui) 
       {
-         
          currentID = "#"+$(ui.item).parent().attr("id");
-
          ui.item.data('multidrag').each(function () {
                 $(this).removeClass('selected');
                 var count = $(ui.item).parent().find('[userid="' + $(this).attr("userid") + '"]').length; 
@@ -300,33 +322,184 @@ font-size: 18px;}
         //$("#EventsList").append("<li>stop</li>");
         /* Look in the original container and remove any duplicates */
         //currentID = "#"+$(ui.item).parent().attr("id");
-        
-        $(currentID).find("li").removeClass('selected');
+        /* START - OLD CODE */
+        if(CopyItems.length > 0)
+        {
+          currentID = "#"+$(ui.item).parent().attr("id");
+          $(currentID).find("li").removeClass('selected');
+          var currentElements = $(currentID).children("li").clone();
+          currentElements.each(function()
+          {
+                var userid = $(this).attr("userid");
+                var NumOfItemsFound = $(currentID).find('[userid="' + userid + '"]').length;
+                
+                if(NumOfItemsFound > 1){
+                  $(currentID).find('[userid="' + userid + '"]:first').remove();
+                } 
+          });
+          var userID = $(ui.item).attr('userid');
+          var groupID = $(ui.item).attr('groupid');
+          RemoveUserFromCopyItemsList(userID, groupID);
+
+        }
+        else
+        {
+          $(currentID).find("li").removeClass('selected');
+        }
         
 
         //UsersLI.detach().appendTo(Users);
         ulID = currentID.substring(1, currentID.length);
         var desc = false;
-        sortUnorderedList(ulID,desc)
+        //sortUnorderedList(ulID,desc)
       } 
     });
-    
-    $(".DeleteMe").click(function(){$(this).context.parentElement.remove();});
-    
-    $("#SearchForUserGrid").click(function()
+    function init()
     {
-        var options = {};
-        $("#SearchGrid").toggle("blind",options, 500);
-    })
 
-    $("lnkCopyUser").click(function()
+      ConfigureSearchUsersCtrl();
+      LoadUI();
+      LoadGroupsTypeAheadTextBox();
+      ControlEventRegistration();
+    }
+    function GetSharePointGroups()
     {
-       EnableCopyMode()
-    })
+      var SharePointGroups = []
+      for(var a = 0; a <= Groups.length-1; a++)
+      {
+          SharePointGroups.push(Groups[a].GroupName)
+      }
+      return SharePointGroups;
+    }
+    function LoadGroupsTypeAheadTextBox()
+    {
+        var spGroups = GetSharePointGroups();
+        var availableTags = [
+         "ActionScript","AppleScript","Asp","BASIC","C",
+         "C++","Clojure","COBOL","ColdFusion","Erlang","Fortran",
+         "Groovy","Haskell","Java","JavaScript","Lisp",
+         "Perl","PHP","Python","Ruby","Scala","Scheme"
+        ];
+
+        function split( val ) {
+          return val.split( /,\s*/ );
+        }
+        function extractLast( term ) {
+          return split( term ).pop();
+        }
+
+          $( "#CopyUserToGroupTextbox" )
+          // don't navigate away from the field on tab when selecting an item
+          .bind( "keydown", function( event ) {
+            if ( event.keyCode === $.ui.keyCode.TAB &&
+                $( this ).autocomplete( "instance" ).menu.active ) {
+              event.preventDefault();
+            }
+          })
+          .autocomplete({
+            minLength: 0,
+            source: function( request, response ) {
+              // delegate back to autocomplete, but extract the last term
+              response( $.ui.autocomplete.filter(
+                spGroups, extractLast( request.term ) ) );
+            },
+            focus: function() {
+              // prevent value inserted on focus
+              return false;
+            },
+            select: function( event, ui ) {
+              var terms = split( this.value );
+              // remove the current input
+              terms.pop();
+              // add the selected item
+              terms.push( ui.item.value );
+              // add placeholder to get the comma-and-space at the end
+              terms.push( "" );
+              this.value = terms.join( ", " );
+              return false;
+            }
+          });
+    }
+    function ControlEventRegistration()
+    {
+       $(".DeleteMe").click(function(){$(this).context.parentElement.remove();});
+
+       $("#SearchForUserGrid").click(function()
+       {
+          if($("#CopyUsersToGroupSection").is(":visible") == false)
+          {
+              var options = {};
+              $("#SearchGrid").toggle("blind",options, 500);  
+          }
+       });
+
+       $("#CopyUsersToGroupGrid").click(function()
+       {
+          if($("#SearchGrid").is(":visible") == false)
+          {
+            var options = {};
+            $("#CopyUsersToGroupSection").toggle("blind",options, 500);  
+          }
+       });
+
+       $(".CopyMe").click(function()
+       {
+          var UserID = $(this).attr("securityobjectid");
+          var GroupID = $(this).attr("groupid");
+          EnableCopyMode(UserID, GroupID)
+       });
+    }
+   
+    
+    
+
+    
+    
+
   });
-  function EnableCopyMode()
+
+
+  /* EnableCopyMode(UserID, GroupID) - this event is fired everytime when the user clicks on the Copy icon, which enables the ability to copy user(s) from one group to another. 
+  Parameters:
+  * UserID - represents a SharePoint User ID
+  * GroupID - represents a SharePoint Group ID*/
+  function EnableCopyMode(UserID, GroupID)
   {
-    CopyModeEnabled +=
+    if(CopyItemExists(UserID, GroupID) == false)
+    {
+      var CopyItem = new Object()
+      CopyItem.UserID = UserID;
+      CopyItem.GroupID = GroupID;
+      CopyItems.push(CopyItem);
+      
+    }
+    else
+    {
+      RemoveUserFromCopyItemsList(UserID, GroupID)
+    }
+  }
+  function CopyItemExists(UserID, GroupID)
+  {
+    var UserExists = false;
+    $.grep(CopyItems, function(a)
+      {
+              if(a.UserID == UserID && a.GroupID == GroupID)
+              {
+                 UserExists = true;
+              }
+      });
+    return UserExists;
+  }
+  function RemoveUserFromCopyItemsList(UserID, GroupID)
+  {
+      var CopyItem = $.grep(CopyItems, function(a)
+        {
+              if(a.UserID == UserID && a.GroupID == UserID)
+              {
+                 return a;
+              }
+        });
+      CopyItems.pop(CopyItem);
   }
   function sortUnorderedList(ul, sortDescending) {
           if(typeof ul == "string")
@@ -351,7 +524,12 @@ font-size: 18px;}
 <body>
 <div id="SearchContainer">
   <form role="form">
-    <a id="SearchForUserGrid" href="#"><label id="SearchUserLabel" for="SearchUsersTextbox">Search for users</label></a>
+    <a id="SearchForUserGrid" href="#">
+      <label id="SearchUserLabel" for="SearchUsersTextbox">Search for users</label>
+    </a>&nbsp; |&nbsp;
+    <a id="CopyUsersToGroupGrid" href="#">
+      <label id="CopyUsersGridLabel" for="CopyUserToGroupTextbox">Copy Users To Group</label>
+    </a>
     
     <div id="SearchGrid" style="display:none">
     
@@ -360,9 +538,17 @@ font-size: 18px;}
     <span class="help-block">Type in and select the user's name and click the Search Users button to start your search. </span>
     <button type="button" id="SearchUsers" class="btn btn-primary btn-sm">Search Users</button>
     </div>
+    <div style='margin-top:1px;'></div>
+    <div id="CopyUsersToGroupSection" style="display:none">
+        <input type="text" id="CopyUserToGroupTextbox" class="form-control ui-state-highlight" />
+    
+    <span class="help-block">Type the name of the group and select multipe groups.</span>
+    <button type="button" id="CopyUserToGroup" class="btn btn-primary btn-sm">Copy Users</button>
+    </div>
   </form>
 </div>
 <div id="SearchResultMessage" class="SearchResultMessage"></div>
+
 <div id="SiteGroupsUsersContainer">
 </div>
 </body>
