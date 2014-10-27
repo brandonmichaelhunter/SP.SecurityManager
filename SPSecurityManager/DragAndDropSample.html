@@ -42,8 +42,7 @@ font-size: 18px;}
   var CopyModeEnabled = 0;
   var CopyItems = [];
   var Groups = [];
-  function SearchUsers()
-  {
+  function SearchUsers(){
       var Count = 0;
       var GroupNames = [];
       var UserName = "";
@@ -87,8 +86,7 @@ font-size: 18px;}
       
   }
   var SelectedUsers = []
-  function ConfigureSearchUsersCtrl()
-  {
+  function ConfigureSearchUsersCtrl(){
     $("#SearchUsers").click(function()
       {
         SearchUsers();
@@ -119,8 +117,7 @@ font-size: 18px;}
       return split( term ).pop();
     }
 
-  function LoadUsers()
-  {
+  function LoadUsers(){
     var Users = [];
     for(var a = 0; a < 101; a++)
     {
@@ -131,8 +128,7 @@ font-size: 18px;}
     }
     return Users;
   }
-  function GetSecurityDetails()
-  {
+  function GetSecurityDetails(){
     var secObjs = [];
     var secObj = new Object();
 
@@ -186,8 +182,7 @@ font-size: 18px;}
     }
     return secObjs;
   }
-  function LoadUI()
-  {
+  function LoadUI(){
     var securityObjs = GetSecurityDetails();
     var oldGroup = "";
     var newGroup = "";
@@ -208,8 +203,7 @@ font-size: 18px;}
     }
     htmlString += "<tr>"
     
-    for(var b = 0; b <= Groups.length-1; b++)
-    {
+    for(var b = 0; b <= Groups.length-1; b++){
         if(b % 4 != 0 || b == 0)
         {
           htmlString += "<td valign='top'><div><div  groupid='"+Groups[b].GroupID+"'>"+Groups[b].GroupName+"</div><div>";
@@ -277,8 +271,7 @@ font-size: 18px;}
             /**/
             
             /* START - OLD CODE */
-            if(CopyItems.length > 0)
-            {
+            if(CopyItems.length > 0){
                 
                 if (!item.hasClass('selected')) {
                     item.addClass('selected').siblings().removeClass('selected');
@@ -290,8 +283,7 @@ font-size: 18px;}
                 debugger;
                 return helper.append(elements);
             }
-            else
-            {
+            else{
                 //alert("We do not have copy items")
                 if (!item.hasClass('selected')) {
                     item.addClass('selected').siblings().removeClass('selected');
@@ -306,8 +298,7 @@ font-size: 18px;}
             /* END - OLD CODE */
       },
 
-      receive: function (event, ui) 
-      {
+      receive: function (event, ui) {
          currentID = "#"+$(ui.item).parent().attr("id");
          ui.item.data('multidrag').each(function () {
                 $(this).removeClass('selected');
@@ -354,16 +345,14 @@ font-size: 18px;}
         //sortUnorderedList(ulID,desc)
       } 
     });
-    function init()
-    {
+    function init(){
 
       ConfigureSearchUsersCtrl();
       LoadUI();
       LoadGroupsTypeAheadTextBox();
       ControlEventRegistration();
     }
-    function GetSharePointGroups()
-    {
+    function GetSharePointGroups(){
       var SharePointGroups = []
       for(var a = 0; a <= Groups.length-1; a++)
       {
@@ -371,15 +360,8 @@ font-size: 18px;}
       }
       return SharePointGroups;
     }
-    function LoadGroupsTypeAheadTextBox()
-    {
+    function LoadGroupsTypeAheadTextBox(){
         var spGroups = GetSharePointGroups();
-        var availableTags = [
-         "ActionScript","AppleScript","Asp","BASIC","C",
-         "C++","Clojure","COBOL","ColdFusion","Erlang","Fortran",
-         "Groovy","Haskell","Java","JavaScript","Lisp",
-         "Perl","PHP","Python","Ruby","Scala","Scheme"
-        ];
 
         function split( val ) {
           return val.split( /,\s*/ );
@@ -420,8 +402,7 @@ font-size: 18px;}
             }
           });
     }
-    function ControlEventRegistration()
-    {
+    function ControlEventRegistration(){
        $(".DeleteMe").click(function(){$(this).context.parentElement.remove();});
 
        $("#SearchForUserGrid").click(function()
@@ -448,23 +429,27 @@ font-size: 18px;}
           var GroupID = $(this).attr("groupid");
           EnableCopyMode(UserID, GroupID)
        });
+
+       $("#CopyUserToGroup").click(function()
+       {
+            var selectedGroups = $("#CopyUserToGroupTextbox").val().split(',');
+            CopyUsersToGroup(selectedGroups, CopyItems);
+            
+       });
     }
-   
-    
-    
-
-    
-    
-
   });
 
-
+  function CopyUsersToGroup(SelectedGroups, UsersToCopy)
+  {
+         /* Create new li item. */
+         /* Locate the new groups. */
+         /* Add the users to the new group. */
+  }
   /* EnableCopyMode(UserID, GroupID) - this event is fired everytime when the user clicks on the Copy icon, which enables the ability to copy user(s) from one group to another. 
   Parameters:
   * UserID - represents a SharePoint User ID
   * GroupID - represents a SharePoint Group ID*/
-  function EnableCopyMode(UserID, GroupID)
-  {
+  function EnableCopyMode(UserID, GroupID){
     if(CopyItemExists(UserID, GroupID) == false)
     {
       var CopyItem = new Object()
@@ -477,9 +462,10 @@ font-size: 18px;}
     {
       RemoveUserFromCopyItemsList(UserID, GroupID)
     }
+   
+  
   }
-  function CopyItemExists(UserID, GroupID)
-  {
+  function CopyItemExists(UserID, GroupID){
     var UserExists = false;
     $.grep(CopyItems, function(a)
       {
@@ -490,8 +476,7 @@ font-size: 18px;}
       });
     return UserExists;
   }
-  function RemoveUserFromCopyItemsList(UserID, GroupID)
-  {
+  function RemoveUserFromCopyItemsList(UserID, GroupID){
       var CopyItem = $.grep(CopyItems, function(a)
         {
               if(a.UserID == UserID && a.GroupID == UserID)
