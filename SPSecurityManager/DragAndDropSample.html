@@ -37,11 +37,19 @@ font-size: 18px;}
   </style>
   <script>
   /*
-    TODO: For copy users and groups selected, hook up the Copy Users button to move the users to their new group. After they have been copy removed the SelelctedUsers class from the source items.
+      TODO:
+      1. Continue testing copying users from one group to another.
+      2. After the items are copy, removed the 'SelectedUser' class from the original items.
+      3. Update the UsersList array by adding the copyed users
+      4. Closes the 'Copy Users To Group' grid. Clear the textbox.
+      5. When dragging a user from one group to another, then update the UsersList by updating the group id of the user.
+      6. Create a list that stores all the changes from user group chagnes, adding new users to a group or removing users from a group.
+
   */
   var CopyModeEnabled = 0;
   var CopyItems = [];
   var Groups = [];
+  var UsersList = [];
   function SearchUsers(){
       var Count = 0;
       var GroupNames = [];
@@ -50,6 +58,7 @@ font-size: 18px;}
       var GroupID = "";
       var GroupText = "";
       var SearchResultMessage = "";
+      
       /* Remove the class once a new search begins. */
       $("div").removeClass('SelectedUsers')
       $("li").removeClass('SelectedUsers')
@@ -202,7 +211,7 @@ font-size: 18px;}
             }
     }
     htmlString += "<tr>"
-    
+    var UserItem = null;
     for(var b = 0; b <= Groups.length-1; b++){
         if(b % 4 != 0 || b == 0)
         {
@@ -210,6 +219,13 @@ font-size: 18px;}
           htmlString += "<ul id='"+Groups[b].GroupName+"' class='connectedSortable groups containers'>";
           for(var c = 0; c < securityObjs.length; c++)
           {
+              UserItem = new Object();
+              UserItem.UserName = securityObjs[c].UserName;
+              UserItem.UserID = securityObjs[c].UserID;
+              UserItem.UserEmail = securityObjs[c].UserEmail;
+              UserItem.GroupID = securityObjs[c].GroupID;   
+              UsersList.push(UserItem);
+
               if(Groups[b].GroupID == securityObjs[c].GroupID)
               {
                  var UserName = securityObjs[c].UserName;
@@ -222,17 +238,26 @@ font-size: 18px;}
        }
        else
        {
+          
+          
           htmlString += "</ul></td></tr>"; 
           htmlString += "<tr>";
           htmlString += "<td valign='top'><div><div  groupid='"+Groups[b].GroupID+"'>"+Groups[b].GroupName+"</div><div>";
           htmlString += "<ul id='"+Groups[b].GroupName+"' class='connectedSortable groups containers'>";
           for(var c = 0; c < securityObjs.length; c++)
           {
+              UserItem = new Object();
+              UserItem.UserName = securityObjs[c].UserName;
+              UserItem.UserID = securityObjs[c].UserID;
+              UserItem.UserEmail = securityObjs[c].UserEmail;
+              UserItem.GroupID = securityObjs[c].GroupID;   
+              UsersList.push(UserItem);
               if(Groups[b].GroupID == securityObjs[c].GroupID)
               {
                  var UserName = securityObjs[c].UserName;
                  var UserID = securityObjs[c].UserID;
                  var UserEmail = securityObjs[c].UserEmail;
+                 var GroupID = securityObjs[c].GroupID;
                  htmlString += "<li userid='"+UserID+"' groupid='"+GroupID+"'  username='"+UserName+"' class='ui-state-default'><div class='UserNameContainer'><div class='UserNameNamePanel'>"+UserName+"</div><div class='UserNameIconPanel'><a class='CopyMe' id='lnkCopyUser' groupid='"+GroupID+"' href='#' Title='Copy User' securityobjectid='"+UserID+"'>C</a></div><div class='UserNameIconPanel'><a href='#' Title='Delete User' securityobjectid='"+UserID+"' class='DeleteMe'>&nbsp;&nbsp;<img src='Images/Delete_Icon_15x15.png' alt='Delete User' /></a></div><div class='UserNameIconPanel'><a class='Info' securityobjectid='"+UserID+"' href='#' Title='User Info'>&nbsp;&nbsp;<img src='Images/Info_Icon_15x15.png' alt='User Info' /></a></div><div class='UserNameFooterPanel'></div></div></li>"; /**/
             }
          }
@@ -425,8 +450,9 @@ font-size: 18px;}
 
        $(".CopyMe").click(function()
        {
-          var UserID = $(this).attr("securityobjectid");
-          var GroupID = $(this).attr("groupid");
+          var UserID   = $(this).attr("securityobjectid");
+          var GroupID  = $(this).attr("groupid");
+          var UserName = "";
           EnableCopyMode(UserID, GroupID)
        });
 
@@ -434,16 +460,63 @@ font-size: 18px;}
        {
             var selectedGroups = $("#CopyUserToGroupTextbox").val().split(',');
             CopyUsersToGroup(selectedGroups, CopyItems);
-            
        });
     }
   });
 
   function CopyUsersToGroup(SelectedGroups, UsersToCopy)
   {
+         /* Loop through each group. */
+         for(var a = 0; a < SelectedGroups.length - 1; a++)
+         {
+            /* Find the group on the page and then find the UL object */
+            var UserGroup = $.trim(SelectedGroups[a]);
+            var GroupContainer = null
+            var GroupID = $("#SiteGroupsUsersContainer").find("div:contains('"+UserGroup+"')").attr("groupid");
+            
+            GroupContainer = $("#SiteGroupsUsersContainer").find("div:contains('"+UserGroup+"')").find("UL");
+            
+            for(var b = 0; b <= UsersToCopy.length - 1; b++)
+            {
+              var userID = UsersToCopy[b].UserID;
+              var groupID = UsersToCopy[b].GroupID;
+              User = GetUserProfileByID(userID, groupID);
+
+              /* Create new list item element */
+              UserID   = User.UserID;
+              GroupID  = User.GroupID;
+              UserName = User.UserName;
+
+              var li  = "<li userid='"+UserID+"' groupid='"+GroupID+"'  username='"+UserName+"' class='ui-state-default'><div class='UserNameContainer'><div class='UserNameNamePanel'>"+UserName+"</div><div class='UserNameIconPanel'><a class='CopyMe' id='lnkCopyUser' groupid='"+GroupID+"' href='#' Title='Copy User' securityobjectid='"+UserID+"'>C</a></div><div class='UserNameIconPanel'><a href='#' Title='Delete User' securityobjectid='"+UserID+"' class='DeleteMe'>&nbsp;&nbsp;<img src='Images/Delete_Icon_15x15.png' alt='Delete User' /></a></div><div class='UserNameIconPanel'><a class='Info' securityobjectid='"+UserID+"' href='#' Title='User Info'>&nbsp;&nbsp;<img src='Images/Info_Icon_15x15.png' alt='User Info' /></a></div><div class='UserNameFooterPanel'></div></div></li>";
+              
+              /* Add the element to the group. */
+              ULContainer = $("#SiteGroupsUsersContainer").find("div:contains('"+UserGroup+"')").find("UL");
+              var FirstListItem = ULContainer.find("li:eq(0)");
+              FirstListItem.before(li);  
+
+            }
+         }
          /* Create new li item. */
+
          /* Locate the new groups. */
          /* Add the users to the new group. */
+  }
+  /* GetUserProfileByID(UserID, GroupID) - this function retrieves a user profile based on the UserID and GroupID keys. 
+     Parameters: 
+     UserID - represents a SharePoint User ID
+     GroupID - represents a SharePoint Group ID
+  */
+  function GetUserProfileByID(UserID, GroupID)
+  {
+     var UserItem = "";
+     for(var a = 0; a < UsersList.length; a++)
+     {
+          if(UsersList[a].UserID == UserID && UsersList[a].GroupID == GroupID)
+          {
+            UserItem = UsersList[a];
+          }
+     }
+     return UserItem;
   }
   /* EnableCopyMode(UserID, GroupID) - this event is fired everytime when the user clicks on the Copy icon, which enables the ability to copy user(s) from one group to another. 
   Parameters:
@@ -462,7 +535,6 @@ font-size: 18px;}
     {
       RemoveUserFromCopyItemsList(UserID, GroupID)
     }
-   
   
   }
   function CopyItemExists(UserID, GroupID){
@@ -477,14 +549,10 @@ font-size: 18px;}
     return UserExists;
   }
   function RemoveUserFromCopyItemsList(UserID, GroupID){
-      var CopyItem = $.grep(CopyItems, function(a)
+      CopyItems = $.grep(CopyItems, function(a)
         {
-              if(a.UserID == UserID && a.GroupID == UserID)
-              {
-                 return a;
-              }
+              return (a.UserID != UserID && a.GroupID != UserID)
         });
-      CopyItems.pop(CopyItem);
   }
   function sortUnorderedList(ul, sortDescending) {
           if(typeof ul == "string")
