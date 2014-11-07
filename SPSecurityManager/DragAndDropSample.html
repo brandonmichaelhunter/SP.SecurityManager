@@ -38,18 +38,19 @@ font-size: 18px;}
   <script>
   /*
       TODO:
-      1. Continue testing copying users from one group to another.
-      2. After the items are copy, removed the 'SelectedUser' class from the original items.
-      3. Update the UsersList array by adding the copyed users
-      4. Closes the 'Copy Users To Group' grid. Clear the textbox.
-      5. When dragging a user from one group to another, then update the UsersList by updating the group id of the user.
-      6. Create a list that stores all the changes from user group chagnes, adding new users to a group or removing users from a group.
+      1. Update the UsersList when deleting a user. 
+      2. Closes the 'Copy Users To Group' grid. Clear the textbox.
+      3. When dragging a user from one group to another, then update the UsersList by updating the group id of the user.
+      4. Create a list that stores all the changes from user group chagnes, adding new users to a group or removing users from a group.
+      5. Need to fix the DeleteUser method. For some reason this does not remove the LI element from the UL element.
 
   */
   var CopyModeEnabled = 0;
   var CopyItems = [];
   var Groups = [];
   var UsersList = [];
+  var SecurityChanges = [];
+  var SecurityChange = null;
   function SearchUsers(){
       var Count = 0;
       var GroupNames = [];
@@ -112,7 +113,6 @@ font-size: 18px;}
           source: SiteUsers,
           select: function(event, ui)
           {
-                  
             $("#SearchUsersTextbox").val(ui.item.label);
             $("#SearchUsersSelectedID").val(ui.item.value);
             return false;
@@ -216,7 +216,7 @@ font-size: 18px;}
         if(b % 4 != 0 || b == 0)
         {
           htmlString += "<td valign='top'><div><div  groupid='"+Groups[b].GroupID+"'>"+Groups[b].GroupName+"</div><div>";
-          htmlString += "<ul id='"+Groups[b].GroupName+"' class='connectedSortable groups containers'>";
+          htmlString += "<ul id='"+Groups[b].GroupName+"' groupid='"+Groups[b].GroupID+"' class='connectedSortable groups containers'>";
           for(var c = 0; c < securityObjs.length; c++)
           {
               UserItem = new Object();
@@ -243,7 +243,7 @@ font-size: 18px;}
           htmlString += "</ul></td></tr>"; 
           htmlString += "<tr>";
           htmlString += "<td valign='top'><div><div  groupid='"+Groups[b].GroupID+"'>"+Groups[b].GroupName+"</div><div>";
-          htmlString += "<ul id='"+Groups[b].GroupName+"' class='connectedSortable groups containers'>";
+          htmlString += "<ul id='"+Groups[b].GroupName+"' groupid='"+Groups[b].GroupID+"' class='connectedSortable groups containers'>";
           for(var c = 0; c < securityObjs.length; c++)
           {
               UserItem = new Object();
@@ -325,9 +325,17 @@ font-size: 18px;}
 
       receive: function (event, ui) {
          currentID = "#"+$(ui.item).parent().attr("id");
+         var groupID = $(ui.item).parent().attr("groupid"); 
+         
+
          ui.item.data('multidrag').each(function () {
                 $(this).removeClass('selected');
+                
+
                 var count = $(ui.item).parent().find('[userid="' + $(this).attr("userid") + '"]').length; 
+                var userid  = $(this).attr("userid");
+                var action  = "Add";
+                AddSecurityChange(userid,groupID,action);
                 if (count > 1) {
                     $(ui.item).remove();
                 }
@@ -335,10 +343,10 @@ font-size: 18px;}
             ui.item.after(ui.item.data('multidrag')).remove();
       },
       stop: function(event,ui){
-        //$("#EventsList").append("<li>stop</li>");
         /* Look in the original container and remove any duplicates */
         //currentID = "#"+$(ui.item).parent().attr("id");
         /* START - OLD CODE */
+        
         if(CopyItems.length > 0)
         {
           currentID = "#"+$(ui.item).parent().attr("id");
@@ -346,12 +354,17 @@ font-size: 18px;}
           var currentElements = $(currentID).children("li").clone();
           currentElements.each(function()
           {
-                var userid = $(this).attr("userid");
+                var userid  = $(this).attr("userid");
+                var groupid = $(this).attr("groupid");
+                var action  = "Add";
+                
+               
                 var NumOfItemsFound = $(currentID).find('[userid="' + userid + '"]').length;
                 
                 if(NumOfItemsFound > 1){
                   $(currentID).find('[userid="' + userid + '"]:first').remove();
-                } 
+                }
+
           });
           var userID = $(ui.item).attr('userid');
           var groupID = $(ui.item).attr('groupid');
@@ -360,6 +373,20 @@ font-size: 18px;}
         }
         else
         {
+
+          currentID = "#"+$(ui.item).parent().attr("id");
+          
+          $(currentID).find("li").removeClass('selected');
+          var currentElements = $(currentID).children("li").clone();
+          currentElements.each(function()
+          {
+                var userid  = $(this).attr("userid");
+                var groupid = $(this).attr("groupid");
+                var action  = "Add";
+                
+                
+                alert("Test")
+          });
           $(currentID).find("li").removeClass('selected');
         }
         
@@ -377,6 +404,7 @@ font-size: 18px;}
       LoadGroupsTypeAheadTextBox();
       ControlEventRegistration();
     }
+    
     function GetSharePointGroups(){
       var SharePointGroups = []
       for(var a = 0; a <= Groups.length-1; a++)
@@ -427,8 +455,20 @@ font-size: 18px;}
             }
           });
     }
+    function DeleteUser(Context)
+    {
+        var UserID = Context.attr("userid");
+        var GroupID = Context.attr("groupid");
+        var Action = "Delete";
+        AddSecurityChange(UserID, GroupID, Action)
+        Context.context.parentElement().remove();
+    }
     function ControlEventRegistration(){
-       $(".DeleteMe").click(function(){$(this).context.parentElement.remove();});
+       $(".DeleteMe").click(function()
+        {
+          
+          DeleteUser($(this));
+        });
 
        $("#SearchForUserGrid").click(function()
        {
@@ -493,8 +533,15 @@ font-size: 18px;}
               ULContainer = $("#SiteGroupsUsersContainer").find("div:contains('"+UserGroup+"')").find("UL");
               var FirstListItem = ULContainer.find("li:eq(0)");
               FirstListItem.before(li);  
-
+              $("li").removeClass('selected');
+              AddSecurityChange(UserID, GroupID, "Add");
+              /* Remove the user from the copy items list. */
+              RemoveUserFromCopyItemsList(userID, groupID)
             }
+              /* Sort the list. */
+              var ListID = ULContainer.attr("id")
+              var desc = false;
+              sortUnorderedList(ListID,desc)
          }
          /* Create new li item. */
 
@@ -523,6 +570,7 @@ font-size: 18px;}
   * UserID - represents a SharePoint User ID
   * GroupID - represents a SharePoint Group ID*/
   function EnableCopyMode(UserID, GroupID){
+    
     if(CopyItemExists(UserID, GroupID) == false)
     {
       var CopyItem = new Object()
@@ -535,7 +583,7 @@ font-size: 18px;}
     {
       RemoveUserFromCopyItemsList(UserID, GroupID)
     }
-  
+    alert(CopyItems.length)
   }
   function CopyItemExists(UserID, GroupID){
     var UserExists = false;
@@ -572,6 +620,18 @@ font-size: 18px;}
           for(var i = 0, l = lis.length; i < l; i++)
             lis[i].innerHTML = vals[i];
         }
+        /************************************/
+    /* Security Changes Capture Methods */
+    /************************************/
+    function AddSecurityChange(UserID, GroupID, Action)
+    {
+       SecurityChange         = new Object();
+       SecurityChange.UserID  = UserID;
+       SecurityChange.GroupID = GroupID;
+       SecurityChange.Aciton  = Action;
+       SecurityChanges.push(SecurityChange);
+       alert(SecurityChanges.length)
+    }
   </script>
 </head>
 <body>
